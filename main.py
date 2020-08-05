@@ -31,18 +31,33 @@ def main():
     
     n_images = 100 # number of html tags to crawl until a true image url is found for search. 
 
+    search_list = get_search_list("product_meta.csv")
+    print("Total number of items : ", len(search_list))
+
+    for i, item in enumerate(search_list):
+        image_name = item
+        #print(item)
+        img_url = get_image_url(image_name, n_images)
+        print(i,"/",len(search_list), " >  product : ", item, ", url : ", img_url)
+
+        download_image(image_name, img_url)
 
 
-    image_name = "rear derailleur"
-    img_url = get_image_url(image_name, n_images)
 
-# imagelinks.append(img_url)
-    # print(f'found {len(imagelinks)} images')
-    # print('Start downloading...')
+def get_search_list(input_csv):
+    df = pd.read_csv(input_csv)
+    print(df.info())
+
+    print(df.head())
+
+    search_list = df['title']
+    return search_list
+
 
 
 def download_image(image_name, image_url):
-        response = requests.get(image_url)
+    
+    response = requests.get(image_url)
 
     imagename = SAVE_FOLDER + '/' + image_name  + '.jpg'
     with open(imagename, 'wb') as file:
@@ -55,11 +70,11 @@ def get_image_url(data, n_images):
    
     #n_images = int(input('How many images do you want? '))
 
-    print('Start searching...')
+    #print('Start searching...')
     
     # get url query string
     searchurl = GOOGLE_IMAGE + 'q=' + data
-    print(searchurl)
+    #print(searchurl)
 
     # request url, without usr_agent the permission gets denied
     response = requests.get(searchurl, headers=usr_agent)
@@ -68,7 +83,7 @@ def get_image_url(data, n_images):
     # find all divs where class='rg_meta'
     soup = BeautifulSoup(html, 'html.parser')
     results = soup.findAll('img', {'class': 'rg_i Q4LuWd'}, limit=n_images)
-    print("Number of entries found : ", len(results))
+    #print("Number of entries found : ", len(results))
     img_url = []
  
     image_count = 0
@@ -79,19 +94,17 @@ def get_image_url(data, n_images):
             img_url = result['data-src']
             
             if img_url is not None:
-                print(image_count," : " , img_url)             
+                #print(image_count," : " , img_url)             
                 return img_url            
-
-            
-            break     
-
-
+            break    
         except:
-            print(image_count, " : No data-src")
+            pass
+            #print(image_count, " : No data-src")
             
 
 
-    
+    print("Did not get image url for ", data)
+    exit()
  
 
 if __name__ == '__main__':
