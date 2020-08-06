@@ -26,10 +26,11 @@ usr_agent = {
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input_file', type=str)
+parser.add_argument('--save_folder', type = str)
 
-SAVE_FOLDER = 'images'
 
 args = parser.parse_args()
+SAVE_FOLDER = args.save_folder
 
 def main():
     if not os.path.exists(SAVE_FOLDER):
@@ -42,14 +43,19 @@ def main():
     print("Total number of items : ", len(search_list))
 
     for i, item in search_list.iterrows():
-        item_title = item['title']
-        item_id    = str(int(item['asin']))
-        
-        img_url = get_image_url(item_title, n_images)
-        print(i,"/",len(search_list), " >  product : ", item, ", url : ", img_url)
+        try:
 
-        download_image(item_id, img_url)
+            item_title = item['title']
+            item_id    = str(int(item['asin']))
 
+            img_url = get_image_url(item_title, n_images)
+            print(i,"/",len(search_list), " >  product : ", item, ", url : ", img_url)
+
+            download_image(item_id, img_url)
+            
+
+        except:
+            print("Could not download image for item ", item_title)
 
 
 def get_search_list(input_csv):
@@ -64,12 +70,14 @@ def get_search_list(input_csv):
 
 
 def download_image(image_name, image_url):
-    
+
     response = requests.get(image_url)
 
     imagename = SAVE_FOLDER + '/' + image_name  + '.jpg'
     with open(imagename, 'wb') as file:
         file.write(response.content)
+
+        
     
 
 def get_image_url(data, n_images):
