@@ -3,6 +3,7 @@ import json
 import requests # to sent GET requests
 from bs4 import BeautifulSoup # to parse HTML
 import pandas as pd
+import argparse
 
 # user can input a topic and a number
 # download first n images from google image search
@@ -23,7 +24,12 @@ usr_agent = {
     'Connection': 'keep-alive',
 }
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--input_file', type=str)
+
 SAVE_FOLDER = 'images'
+
+args = parser.parse_args()
 
 def main():
     if not os.path.exists(SAVE_FOLDER):
@@ -31,16 +37,18 @@ def main():
     
     n_images = 100 # number of html tags to crawl until a true image url is found for search. 
 
-    search_list = get_search_list("../rec-sys/datasets/Bike_Exchange/product_meta.csv")
+    search_list = get_search_list(args.input_file)
+    print(search_list.head())
     print("Total number of items : ", len(search_list))
 
-    for i, item in enumerate(search_list):
-        image_name = item
-        #print(item)
-        img_url = get_image_url(image_name, n_images)
+    for i, item in search_list.iterrows():
+        item_title = item['title']
+        item_id    = str(int(item['asin']))
+        
+        img_url = get_image_url(item_title, n_images)
         print(i,"/",len(search_list), " >  product : ", item, ", url : ", img_url)
 
-        download_image(image_name, img_url)
+        download_image(item_id, img_url)
 
 
 
@@ -50,7 +58,7 @@ def get_search_list(input_csv):
 
     print(df.head())
 
-    search_list = df['title']
+    search_list = df[['asin','title']]
     return search_list
 
 
