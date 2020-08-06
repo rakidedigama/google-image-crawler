@@ -31,7 +31,7 @@ def main():
     
     n_images = 100 # number of html tags to crawl until a true image url is found for search. 
 
-    search_list = get_search_list("product_meta.csv")
+    search_list = get_search_list("../rec-sys/datasets/Bike_Exchange/product_meta.csv")
     print("Total number of items : ", len(search_list))
 
     for i, item in enumerate(search_list):
